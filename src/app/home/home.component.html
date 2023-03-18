@@ -8,21 +8,77 @@
   <ion-card>
     <ion-card-header> WoW Token Price </ion-card-header>
     <ion-card-content>
-      <p>
-        EU:The current price of the WoW Token is {{ wowTokenPriceEU }} gold.
-      </p>
-      <br />
-      <p>
-        US:The current price of the WoW Token is {{ wowTokenPriceUS }} gold.
-      </p>
-      <br />
-      <p>
-        KR: The current price of the WoW Token is {{ wowTokenPriceKR }} gold.
-      </p>
-      <br />
-      <p>
-        TW: The current price of the WoW Token is {{ wowTokenPriceTW }} gold.
-      </p>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="auto"
+            ><img src="assets/flag_eu.svg" alt="EU" width="36" height="24"
+          /></ion-col>
+          <ion-col
+            >{{ wowTokenPriceEU }}
+            <img
+              src="assets/gold_transparent.png"
+              alt="Gold"
+              width="13"
+              height="14"
+            />
+            / €20
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="auto"
+            ><img src="assets/flag_us.svg" alt="US" width="36" height="24"
+          /></ion-col>
+          <ion-col
+            >{{ wowTokenPriceUS }}
+            <img
+              src="assets/gold_transparent.png"
+              alt="Gold"
+              width="13"
+              height="14"
+            />
+            / $20
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="auto"
+            ><img src="assets/flag_kr.svg" alt="KR" width="36" height="24"
+          /></ion-col>
+          <ion-col
+            >{{ wowTokenPriceKR }}
+            <img
+              src="assets/gold_transparent.png"
+              alt="US Flag"
+              width="13"
+              height="14"
+            />
+            / ₩22,000
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="auto"
+            ><img src="assets/flag_tw.svg" alt="TW" width="36" height="24"
+          /></ion-col>
+          <ion-col
+            >{{ wowTokenPriceTW }}
+            <img
+              src="assets/gold_transparent.png"
+              alt="TW Flag"
+              width="13"
+              height="14"
+            />
+            / NT$500
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header> WoW Token Price </ion-card-header>
+    <ion-card-content>
+      <canvas #barChart></canvas>
     </ion-card-content>
   </ion-card>
 </ion-content>

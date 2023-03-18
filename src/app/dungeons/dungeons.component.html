@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title> Dungeons </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list *ngFor="let affix of affixes">
+    <ion-item (click)="selectedAffix = selectedAffix === affix ? null : affix">
+      <ion-label>{{ affix.name }}</ion-label>
+      <ion-icon
+        slot="end"
+        name="chevron-down"
+        *ngIf="selectedAffix !== affix"
+      ></ion-icon>
+      <ion-icon
+        slot="end"
+        name="chevron-up"
+        *ngIf="selectedAffix === affix"
+      ></ion-icon>
+    </ion-item>
+    <div *ngIf="selectedAffix === affix" class="dropdown-panel">
+      {{ affix.description }}
+    </div>
+  </ion-list>
+</ion-content>

@@ -1,13 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import axios from 'axios';
-import { windowWhen } from 'rxjs';
+import { Chart, registerables } from 'chart.js';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.component.html',
   styleUrls: ['home.component.scss'],
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+  @ViewChild('barChart', { static: true }) barChart!: ElementRef;
+
   wowTokenPriceEU: number;
   wowTokenPriceUS: number;
   wowTokenPriceKR: number;
@@ -38,7 +40,10 @@ export class HomeComponent {
     );
     const accessToken = response.data.access_token;
 
-    // Retrieve WoW Token price using access token
+    this.getWowTokenPrices(accessToken);
+  }
+
+  async getWowTokenPrices(accessToken: string) {
     try {
       const responseEU = await axios.get(
         `https://eu.api.blizzard.com/data/wow/token/?namespace=dynamic-eu&locale=en_EU&access_token=${accessToken}`
@@ -59,8 +64,34 @@ export class HomeComponent {
         `https://tw.api.blizzard.com/data/wow/token/?namespace=dynamic-tw&locale=en_TW&access_token=${accessToken}`
       );
       this.wowTokenPriceTW = responseTW.data.price / 10000;
+
+      this.showChart();
     } catch (error) {
       console.log(error);
     }
+  }
+
+  showChart() {
+    Chart.register(...registerables);
+    const barChart = new Chart(this.barChart.nativeElement, {
+      type: 'bar',
+      data: {
+        labels: ['EU', 'US', 'KR', 'TW'],
+        datasets: [
+          {
+            label: 'WoW Token Price',
+            data: [
+              this.wowTokenPriceEU,
+              this.wowTokenPriceUS,
+              this.wowTokenPriceKR,
+              this.wowTokenPriceTW,
+            ],
+            backgroundColor: 'gold',
+            borderColor: 'black',
+            borderWidth: 1,
+          },
+        ],
+      },
+    });
   }
 }
