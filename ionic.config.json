@@ -1,0 +1,7 @@
+{
+  "name": "wow-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
