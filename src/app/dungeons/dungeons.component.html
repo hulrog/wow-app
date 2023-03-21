@@ -5,9 +5,19 @@
 </ion-header>
 
 <ion-content>
+  <ion-title class="subtitle"> Current Affixes: </ion-title>
   <ion-list *ngFor="let affix of affixes">
     <ion-item (click)="selectedAffix = selectedAffix === affix ? null : affix">
-      <ion-label>{{ affix.name }}</ion-label>
+      <div class="affix-name-icon">
+        <img
+          [src]="'assets/affixes/' + affix.icon + '.jpg'"
+          alt="Affix Icon"
+          width="36"
+          height="36"
+          class="affix-icon"
+        />
+        <ion-label class="affix-name">{{ affix.name }}</ion-label>
+      </div>
       <ion-icon
         slot="end"
         name="chevron-down"

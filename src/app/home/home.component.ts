@@ -14,6 +14,7 @@ export class HomeComponent implements OnInit {
   wowTokenPriceUS: number;
   wowTokenPriceKR: number;
   wowTokenPriceTW: number;
+  loading: boolean;
 
   constructor() {
     this.wowTokenPriceEU = 0;
@@ -21,6 +22,7 @@ export class HomeComponent implements OnInit {
     this.wowTokenPriceUS = 0;
     this.wowTokenPriceKR = 0;
     this.wowTokenPriceTW = 0;
+    this.loading = true;
   }
 
   async ngOnInit() {
@@ -41,6 +43,8 @@ export class HomeComponent implements OnInit {
     const accessToken = response.data.access_token;
 
     this.getWowTokenPrices(accessToken);
+
+    this.loading = false;
   }
 
   async getWowTokenPrices(accessToken: string) {
@@ -88,7 +92,7 @@ export class HomeComponent implements OnInit {
             ],
             backgroundColor: 'gold',
             borderColor: 'black',
-            borderWidth: 1,
+            borderWidth: 2,
           },
         ],
       },
