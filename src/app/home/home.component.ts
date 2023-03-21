@@ -44,7 +44,10 @@ export class HomeComponent implements OnInit {
 
     this.getWowTokenPrices(accessToken);
 
-    this.loading = false;
+    // samo da izgleda bolje dok se puni
+    setTimeout(() => {
+      this.loading = false;
+    }, 500);
   }
 
   async getWowTokenPrices(accessToken: string) {
@@ -52,7 +55,7 @@ export class HomeComponent implements OnInit {
       const responseEU = await axios.get(
         `https://eu.api.blizzard.com/data/wow/token/?namespace=dynamic-eu&locale=en_EU&access_token=${accessToken}`
       );
-      this.wowTokenPriceEU = responseEU.data.price / 10000; // WoW Token price is in copper
+      this.wowTokenPriceEU = responseEU.data.price / 10000; // jer je u copperu pa je u goldu / 10000
 
       const responseUS = await axios.get(
         `https://us.api.blizzard.com/data/wow/token/?namespace=dynamic-us&locale=en_US&access_token=${accessToken}`

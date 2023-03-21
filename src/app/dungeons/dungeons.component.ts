@@ -10,6 +10,12 @@ interface Affix {
   wowhead_url: string;
 }
 
+interface Dungeon {
+  id: number;
+  slug: string;
+  name: string;
+  short_name: string;
+}
 @Component({
   selector: 'app-dungeons',
   templateUrl: 'dungeons.component.html',
@@ -19,10 +25,16 @@ export class DungeonsComponent implements OnInit {
   @ViewChild('barChart', { static: true }) barChart!: ElementRef;
 
   affixes: Affix[];
+  dungeons: Dungeon[];
   selectedAffix: any = null;
+  selectedSeason: number = 0;
+  loading: boolean;
+  numberOfSeasons: number = 0;
 
   constructor() {
     this.affixes = [];
+    this.dungeons = [];
+    this.loading = true;
   }
 
   async ngOnInit() {
@@ -43,6 +55,10 @@ export class DungeonsComponent implements OnInit {
     const accessToken = response.data.access_token;
 
     this.getCurrentAffixes();
+    this.getDungeons(0);
+    setTimeout(() => {
+      this.loading = false;
+    }, 500);
   }
 
   async getCurrentAffixes() {
@@ -55,5 +71,29 @@ export class DungeonsComponent implements OnInit {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async getDungeons(season: number) {
+    try {
+      const response = await axios.get(
+        `https://raider.io/api/v1/mythic-plus/static-data?expansion_id=9`
+      );
+      this.dungeons = response.data.seasons[season].dungeons;
+      this.numberOfSeasons = response.data.seasons.length;
+      console.log(this.affixes);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  incrementSeason() {
+    this.selectedSeason = (this.selectedSeason + 1) % this.numberOfSeasons;
+    this.getDungeons(this.selectedSeason);
+  }
+
+  decrementSeason() {
+    this.selectedSeason =
+      (this.selectedSeason - 1 + this.numberOfSeasons) % this.numberOfSeasons;
+    this.getDungeons(this.selectedSeason);
   }
 }

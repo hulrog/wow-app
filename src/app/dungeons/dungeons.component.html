@@ -7,7 +7,13 @@
 <ion-content>
   <ion-title class="subtitle"> Current Affixes: </ion-title>
   <ion-list *ngFor="let affix of affixes">
-    <ion-item (click)="selectedAffix = selectedAffix === affix ? null : affix">
+    <ion-item [ngClass]="{ 'ion-hide': !loading }">
+      <ion-spinner></ion-spinner>
+    </ion-item>
+    <ion-item
+      (click)="selectedAffix = selectedAffix === affix ? null : affix"
+      [ngClass]="{ 'ion-hide': loading }"
+    >
       <div class="affix-name-icon">
         <img
           [src]="'assets/affixes/' + affix.icon + '.jpg'"
@@ -33,4 +39,41 @@
       {{ affix.description }}
     </div>
   </ion-list>
+</ion-content>
+
+<ion-content>
+  <ion-title class="subtitle"> M+ Dungeons: </ion-title>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button slot="" (click)="decrementSeason()">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Season {{ numberOfSeasons - selectedSeason }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="incrementSeason()">
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-row>
+    <ion-col size="3" *ngFor="let dungeon of dungeons.slice(0, 4)">
+      <ion-item [ngClass]="{ 'ion-hide': !loading }">
+        <ion-spinner></ion-spinner>
+      </ion-item>
+      <ion-item lines="none" [ngClass]="{ 'ion-hide': loading }">
+        <p class="dungeon-short-name">{{ dungeon.short_name }}</p>
+      </ion-item>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col size="3" *ngFor="let dungeon of dungeons.slice(4, 8)">
+      <ion-item [ngClass]="{ 'ion-hide': !loading }">
+        <ion-spinner></ion-spinner>
+      </ion-item>
+      <ion-item lines="none" [ngClass]="{ 'ion-hide': loading }" no-lines>
+        <p class="dungeon-short-name">{{ dungeon.short_name }}</p>
+      </ion-item>
+    </ion-col>
+  </ion-row>
 </ion-content>
