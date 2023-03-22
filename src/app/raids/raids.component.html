@@ -4,4 +4,27 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content> <ion-label> Raids works!</ion-label> </ion-content>
+<div>
+  <label for="raid-select">Select Raid:</label>
+  <select id="raid-select" [(ngModel)]="selectedRaid">
+    <option value="uldir">Uldir</option>
+    <option value="battle-of-dazaralor">Battle of Dazar'Aalor</option>
+  </select>
+</div>
+<div>
+  <label for="faction-select">Select Faction:</label>
+  <img src="alliance-image.png" (click)="setFaction('alliance')" />
+  <img src="horde-image.png" (click)="setFaction('horde')" />
+</div>
+<div>
+  <label for="region-select">Select Region:</label>
+  <select
+    id="region-select"
+    [(ngModel)]="selectedRegion"
+    (change)="setNamespaceAndLocale()"
+  >
+    <option value="eu">EU</option>
+    <option value="us">US</option>
+  </select>
+</div>
+<button (click)="getRaidLeaderboard()">Get Raid Leaderboard</button>
