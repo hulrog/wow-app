@@ -7,7 +7,7 @@
 <ion-content>
   <ion-item>
     <ion-label>Select Raid:</ion-label>
-    <ion-select [(ngModel)]="selectedRaid">
+    <ion-select [(ngModel)]="selectedRaid" interface="popover">
       <ion-select-option value="vault-of-the-incarnates"
         >Vault of the Incarnates</ion-select-option
       >
@@ -56,6 +56,14 @@
             [class.transparent]="selectedFaction !== 'horde'"
           ></ion-img>
         </ion-col>
+        <ion-col>
+          <ion-img
+            src="assets/symbol_both.png"
+            (click)="setFaction('both')"
+            [class.selected]="selectedFaction === 'both'"
+            [class.transparent]="selectedFaction !== 'both'"
+          ></ion-img>
+        </ion-col>
       </ion-row>
     </ion-grid>
   </ion-item>
@@ -64,19 +72,27 @@
     <ion-button (click)="getRaidLeaderboard()">Show Leaderboard</ion-button>
   </div>
 </ion-content>
+<div *ngIf="isLoading" class="loader"></div>
 
 <div class="table-scrollable">
   <table>
     <thead id="table-header" class="hidden">
       <tr>
-        <th>Name</th>
-        <th class="small">REG</th>
+        <th>Guild Name</th>
+        <th class="small">F</th>
+        <th class="small">R</th>
         <th class="small">#</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let guild of guilds">
-        <td>{{ guild.name }} - {{ guild.realm }}</td>
+      <tr *ngFor="let guild of guilds" class="table-row">
+        <td>{{ guild.name }}</td>
+        <td
+          class="small"
+          [ngClass]="guild.faction === 'HORDE' ? 'horde' : 'alliance'"
+        >
+          {{ guild.faction === "HORDE" ? "H" : "A" }}
+        </td>
         <td class="small">
           <img
             [src]="'assets/flag_' + guild.region + '.svg'"

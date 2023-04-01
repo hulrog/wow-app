@@ -9,6 +9,8 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HomeComponent } from './home/home.component';
 import { DungeonsComponent } from './dungeons/dungeons.component';
+import { GuildsComponent } from './guilds/guilds.component';
+import { MythicPlusComponent } from './mythic-plus/mythic-plus.component';
 import { RaidsComponent } from './raids/raids.component';
 
 @NgModule({
@@ -16,6 +18,8 @@ import { RaidsComponent } from './raids/raids.component';
     AppComponent,
     HomeComponent,
     DungeonsComponent,
+    GuildsComponent,
+    MythicPlusComponent,
     RaidsComponent,
   ],
   imports: [

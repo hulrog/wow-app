@@ -43,14 +43,10 @@ export class HomeComponent implements OnInit {
     const accessToken = response.data.access_token;
 
     this.getWowTokenPrices(accessToken);
-
-    // samo da izgleda bolje dok se puni
-    setTimeout(() => {
-      this.loading = false;
-    }, 500);
   }
 
   async getWowTokenPrices(accessToken: string) {
+    this.loading = true;
     try {
       const responseEU = await axios.get(
         `https://eu.api.blizzard.com/data/wow/token/?namespace=dynamic-eu&locale=en_EU&access_token=${accessToken}`
@@ -76,6 +72,7 @@ export class HomeComponent implements OnInit {
     } catch (error) {
       console.log(error);
     }
+    this.loading = false;
   }
 
   showChart() {

@@ -1,6 +1,7 @@
 .table-scrollable {
-  max-height: 500px; /* adjust this value as needed */
+  max-height: 65%;
   overflow-y: scroll;
+  position: relative;
 }
 
 .hidden {
@@ -8,16 +9,14 @@
 }
 
 table {
-  font-size: 1.2em; /* adjust this value as needed */
+  font-size: 1.2em;
+  width: 90%;
+  margin: 0 auto;
 }
 
 .small {
   width: 10%;
   text-align: center;
-}
-
-tr {
-  margin-bottom: 50px;
 }
 
 .selected {
@@ -26,4 +25,41 @@ tr {
 
 .transparent {
   opacity: 0.5;
+}
+
+.loader {
+  margin-top: 20px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.horde {
+  color: red;
+}
+
+.alliance {
+  color: blue;
+}
+
+ion-select {
+  max-width: 500px;
 }

@@ -34,11 +34,11 @@ export class DungeonsComponent implements OnInit {
   constructor() {
     this.affixes = [];
     this.dungeons = [];
-    this.loading = true;
+    this.loading = false;
   }
 
   async ngOnInit() {
-    // Retrieve access token using client ID and client secret
+    this.loading = true;
     const response = await axios.post(
       'https://us.battle.net/oauth/token',
       'grant_type=client_credentials',
@@ -56,12 +56,10 @@ export class DungeonsComponent implements OnInit {
 
     this.getCurrentAffixes();
     this.getDungeons(0);
-    setTimeout(() => {
-      this.loading = false;
-    }, 500);
   }
 
   async getCurrentAffixes() {
+    this.loading = true;
     try {
       const response = await axios.get(
         `https://raider.io/api/v1/mythic-plus/affixes?region=eu&locale=en`
@@ -74,6 +72,7 @@ export class DungeonsComponent implements OnInit {
   }
 
   async getDungeons(season: number) {
+    this.loading = true;
     try {
       const response = await axios.get(
         `https://raider.io/api/v1/mythic-plus/static-data?expansion_id=9`
@@ -84,6 +83,7 @@ export class DungeonsComponent implements OnInit {
     } catch (error) {
       console.log(error);
     }
+    this.loading = false;
   }
 
   incrementSeason() {
