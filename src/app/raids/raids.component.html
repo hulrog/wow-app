@@ -1,30 +1,92 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title> Raids </ion-title>
+    <ion-title>Raids</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<div>
-  <label for="raid-select">Select Raid:</label>
-  <select id="raid-select" [(ngModel)]="selectedRaid">
-    <option value="uldir">Uldir</option>
-    <option value="battle-of-dazaralor">Battle of Dazar'Aalor</option>
-  </select>
+<ion-content>
+  <ion-item>
+    <ion-label>Select Raid:</ion-label>
+    <ion-select [(ngModel)]="selectedRaid">
+      <ion-select-option value="vault-of-the-incarnates"
+        >Vault of the Incarnates</ion-select-option
+      >
+      <ion-select-option value="sepulcher-of-the-first-ones"
+        >Sepulcher of the First Ones</ion-select-option
+      >
+      <ion-select-option value="sanctum-of-domination"
+        >Sanctum of Domination</ion-select-option
+      >
+      <ion-select-option value="castle-nathria"
+        >Castle Nathria</ion-select-option
+      >
+      <ion-select-option value="nyalotha-the-waking-city"
+        >Ny'alotha, the Waking City</ion-select-option
+      >
+      <ion-select-option value="the-eternal-palace"
+        >The Eternal Palace</ion-select-option
+      >
+      <ion-select-option value="battle-of-dazaralor"
+        >Battle of Dazar'alor</ion-select-option
+      >
+      <ion-select-option value="crucible-of-storms"
+        >Crucible of Storms</ion-select-option
+      >
+      <ion-select-option value="uldir">Uldir</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Select Faction:</ion-label>
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <ion-img
+            src="assets/symbol_alliance.png"
+            (click)="setFaction('alliance')"
+            [class.selected]="selectedFaction === 'alliance'"
+            [class.transparent]="selectedFaction !== 'alliance'"
+          ></ion-img>
+        </ion-col>
+        <ion-col>
+          <ion-img
+            src="assets/symbol_horde.png"
+            (click)="setFaction('horde')"
+            [class.selected]="selectedFaction === 'horde'"
+            [class.transparent]="selectedFaction !== 'horde'"
+          ></ion-img>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-item>
+
+  <div class="ion-text-center">
+    <ion-button (click)="getRaidLeaderboard()">Show Leaderboard</ion-button>
+  </div>
+</ion-content>
+
+<div class="table-scrollable">
+  <table>
+    <thead id="table-header" class="hidden">
+      <tr>
+        <th>Name</th>
+        <th class="small">REG</th>
+        <th class="small">#</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let guild of guilds">
+        <td>{{ guild.name }} - {{ guild.realm }}</td>
+        <td class="small">
+          <img
+            [src]="'assets/flag_' + guild.region + '.svg'"
+            alt="NA"
+            width="36"
+            height="24"
+          />
+        </td>
+        <td class="small">{{ guild.rank }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
-<div>
-  <label for="faction-select">Select Faction:</label>
-  <img src="alliance-image.png" (click)="setFaction('alliance')" />
-  <img src="horde-image.png" (click)="setFaction('horde')" />
-</div>
-<div>
-  <label for="region-select">Select Region:</label>
-  <select
-    id="region-select"
-    [(ngModel)]="selectedRegion"
-    (change)="setNamespaceAndLocale()"
-  >
-    <option value="eu">EU</option>
-    <option value="us">US</option>
-  </select>
-</div>
-<button (click)="getRaidLeaderboard()">Get Raid Leaderboard</button>

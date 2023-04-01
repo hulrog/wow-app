@@ -1,0 +1,29 @@
+.table-scrollable {
+  max-height: 500px; /* adjust this value as needed */
+  overflow-y: scroll;
+}
+
+.hidden {
+  display: none;
+}
+
+table {
+  font-size: 1.2em; /* adjust this value as needed */
+}
+
+.small {
+  width: 10%;
+  text-align: center;
+}
+
+tr {
+  margin-bottom: 50px;
+}
+
+.selected {
+  filter: brightness(150%);
+}
+
+.transparent {
+  opacity: 0.5;
+}
