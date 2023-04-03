@@ -1,6 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import axios from 'axios';
 
+interface Leaderboard {
+  groups: Group[];
+}
+
+interface Group {
+  keystone: number;
+  players: Player[];
+  score: number;
+}
+
+interface Player {
+  faction: string;
+  name: string;
+}
+
+interface DungeonEntry {
+  id: number;
+  name: string;
+  key: {
+    href: string;
+  };
+}
+interface Dungeon {
+  id: number;
+  name: string;
+  link: string;
+}
 @Component({
   selector: 'app-mythic-plus',
   templateUrl: './mythic-plus.component.html',
@@ -8,8 +35,16 @@ import axios from 'axios';
 })
 export class MythicPlusComponent implements OnInit {
   accessToken: string;
+  connectedRealms: any[];
+  dungeons: Dungeon[];
+  leaderboards: Leaderboard[];
+  selectedDungeon: number;
   constructor() {
     this.accessToken = '';
+    this.connectedRealms = [];
+    this.dungeons = [];
+    this.leaderboards = [];
+    this.selectedDungeon = 0;
   }
 
   async ngOnInit() {
@@ -28,36 +63,59 @@ export class MythicPlusComponent implements OnInit {
     );
     this.accessToken = response.data.access_token;
 
-    this.returnRuns();
+    this.returnDungeons();
+    //this.returnRuns();
+  }
+
+  async returnDungeons() {
+    // Ovo dohvata sve connected realm-ove za us
+    const urlConnectedRealms = `https://us.api.blizzard.com/data/wow/connected-realm/index?namespace=dynamic-us&locale=en_US&access_token=${this.accessToken}`;
+    const responseConnectedRealms = await axios.get(urlConnectedRealms);
+
+    // Sad svaki od tih linkova mogu se pozvati da se dobiju zapravo realmovi
+    const connectedRealms = responseConnectedRealms.data.connected_realms;
+    console.log(connectedRealms);
+    this.connectedRealms = connectedRealms;
+    console.log(connectedRealms);
+
+    // // Za EU
+    // const urlConnectedRealmsEU = `https://eu.api.blizzard.com/data/wow/connected-realm/index?namespace=dynamic-eu&locale=en_GB&access_token=${this.accessToken}`;
+    // const responseConnectedRealmsEU = await axios.get(urlConnectedRealmsEU);
+
+    // // Sad svaki od tih linkova mogu se pozvati da se dobiju zapravo realmovi
+    // const connectedRealmsEU = responseConnectedRealmsEU.data.connected_realms;
+    // console.log(connectedRealmsEU);
+
+    // Dovoljno je izvuci 1, dungeoni su isti za svaki connected realm
+    const realmLink = connectedRealms[0].href;
+    // Vadi id realma iz funkcije
+    const pattern = /\d+/g;
+    const matches = realmLink.match(pattern);
+    const connectedRealmID = matches ? matches[0] : null;
+    console.log(connectedRealmID);
+
+    const urlDungeonsIndex = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmID}/mythic-leaderboard/index?namespace=dynamic-us&locale=en_US&access_token=${this.accessToken}`;
+    const responseDungeonsIndex = await axios.get(urlDungeonsIndex);
+    const dungeonArray: DungeonEntry[] =
+      responseDungeonsIndex.data.current_leaderboards;
+    console.log(dungeonArray);
+
+    const dungeons: Dungeon[] = dungeonArray.map((dungeon) => {
+      return {
+        name: dungeon.name,
+        id: dungeon.id,
+        link: dungeon.key.href,
+      };
+    });
+    console.log(dungeons);
+    this.dungeons = dungeons;
+    console.log(this.dungeons);
   }
 
   async returnRuns() {
-    // Ovo dohvata sve connected realm-ove za us
-    const url = `https://us.api.blizzard.com/data/wow/connected-realm/index?namespace=dynamic-us&locale=en_US&access_token=${this.accessToken}`;
-    const response = await axios.get(url);
-    console.log(response);
-
-    // Sad svaki od tih linkova mogu se pozvati da se dobiju zapravo realmovi
-
-    // Ali ja necu to ja hocu samo da izvucem id-ove connected realmova da bih mogao da ih trpam u
-    // https://us.api.blizzard.com/data/wow/connected-realm/11/
-    // mythic-leaderboard/index?namespace=dynamic-us&locale=en_US&
-    // access_token=EUjS7VVljuaFLZoIVHfbTkmdoF6rfiaISN
-
-    // Osim toga za ovo treba i dungeonID  i period
-    // https://us.api.blizzard.com/data/wow/connected-realm/11/
-    // mythic-leaderboard/2/period/990 - 2 je dungeon id a 900 period (sadasnji)
-    // ?namespace=dynamic-us&locale=en_US&
-    // access_token=EUjS7VVljuaFLZoIVHfbTkmdoF6rfiaISN
-
-    // dungeon id se dobija iz ovog:
-    // https://us.api.blizzard.com/data/wow/connected-realm/11/
-    // mythic-leaderboard/index?namespace=dynamic-us&
-    // locale=en_US&access_token=EUjS7VVljuaFLZoIVHfbTkmdoF6rfiaISN
-
-    // a periodi mogu iz ovog
-    // https://us.api.blizzard.com/data/wow/
-    // mythic-keystone/period/index?namespace=dynamic-us&
-    // locale=en_US&access_token=EUjS7VVljuaFLZoIVHfbTkmdoF6rfiaISN
+    const urlLeaderboard = `https://us.api.blizzard.com/data/wow/connected-realm/113/mythic-leaderboard/2/period/900?namespace=dynamic-us&access_token=${this.accessToken}`;
+    const responseLeaderboard = await axios.get(urlLeaderboard);
+    const leaderboard = responseLeaderboard.data.leading_groups;
+    console.log(leaderboard);
   }
 }

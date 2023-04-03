@@ -1,3 +1,14 @@
-<p>
-  mythic-plus works!
-</p>
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Dungeon</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-label> Select a Dungeon: </ion-label>
+  <ion-select [(ngModel)]="selectedDungeon" interface="popover">
+    <ion-select-option *ngFor="let dungeon of dungeons" [value]="dungeon.id">{{
+      dungeon.name
+    }}</ion-select-option>
+  </ion-select>
+</ion-content>
