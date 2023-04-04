@@ -160,8 +160,6 @@ export class MythicPlusComponent implements OnInit {
 
   formFinalLeaderboard() {
     this.finalLeaderboard = { groups: [] }; // ciscenje
-    console.log(this.leaderboards);
-    // Sve leaderboarde u jedan
     const groups: Group[] = this.leaderboards.flatMap((l) => l.groups);
 
     // Uklanjanje duplikata - koji imaju isti keystoen i duration
@@ -207,7 +205,6 @@ export class MythicPlusComponent implements OnInit {
     const leaderboardInput = responseLeaderboard.data;
     const leaderboard = convertToLeaderboard(leaderboardInput);
     this.leaderboards.push(leaderboard);
-    this.formFinalLeaderboard();
   }
 }
 
