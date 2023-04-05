@@ -114,16 +114,12 @@ export class RaidsComponent implements OnInit {
     // Podaci za hordu:
     const urlHorde = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/horde?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
     const responseHorde = await axios.get(urlHorde);
-    console.log(responseHorde);
     var entriesHorde: Entry[] = responseHorde.data.entries;
-    console.log(entriesHorde);
 
     // Podaci za alijansu
     const urlAlliance = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/alliance?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
     const responseAlliance = await axios.get(urlAlliance);
-    console.log(responseAlliance);
     var entriesAlliance: Entry[] = responseAlliance.data.entries;
-    console.log(entriesAlliance);
 
     const entriesCombined: Entry[] = entriesHorde.concat(entriesAlliance);
     var combinedRank = 1;
