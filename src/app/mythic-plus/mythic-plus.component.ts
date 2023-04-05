@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ToastController } from '@ionic/angular';
 import axios from 'axios';
 
 interface Leaderboard {
@@ -50,16 +51,22 @@ export class MythicPlusComponent implements OnInit {
   dungeons: Dungeon[];
   leaderboards: Leaderboard[];
   selectedDungeon: number;
+  selectedRegion: string;
+  selectedNamespace: string;
   currentPeriod: number;
   finalLeaderboard: FinalLeaderboard;
-  constructor() {
+  isLoading: boolean;
+  constructor(private toastController: ToastController) {
     this.accessToken = '';
     this.connectedRealms = [];
     this.dungeons = [];
     this.leaderboards = [];
     this.selectedDungeon = 0;
+    this.selectedRegion = '';
+    this.selectedNamespace = '';
     this.currentPeriod = 0;
     this.finalLeaderboard = { groups: [] };
+    this.isLoading = false;
   }
 
   async ngOnInit() {
@@ -77,27 +84,16 @@ export class MythicPlusComponent implements OnInit {
       }
     );
     this.accessToken = response.data.access_token;
-
-    this.returnDungeons();
   }
 
   async returnDungeons() {
     //this.leaderboards = []; // izbrisi stari kad se pokrene funkcija ponovo
-    // Ovo dohvata sve connected realm-ove za us
-    const urlConnectedRealms = `https://us.api.blizzard.com/data/wow/connected-realm/index?namespace=dynamic-us&locale=en_US&access_token=${this.accessToken}`;
+    const urlConnectedRealms = `https://${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/index?namespace=${this.selectedNamespace}&locale=en_US&access_token=${this.accessToken}`;
     const responseConnectedRealms = await axios.get(urlConnectedRealms);
 
     // Sad svaki od tih linkova mogu se pozvati da se dobiju zapravo realmovi
     const connectedRealms = responseConnectedRealms.data.connected_realms;
     this.connectedRealms = connectedRealms;
-
-    // // Za EU
-    // const urlConnectedRealmsEU = `https://eu.api.blizzard.com/data/wow/connected-realm/index?namespace=dynamic-eu&locale=en_GB&access_token=${this.accessToken}`;
-    // const responseConnectedRealmsEU = await axios.get(urlConnectedRealmsEU);
-
-    // // Sad svaki od tih linkova mogu se pozvati da se dobiju zapravo realmovi
-    // const connectedRealmsEU = responseConnectedRealmsEU.data.connected_realms;
-    // console.log(connectedRealmsEU);
 
     // Dovoljno je izvuci 1, dungeoni su isti za svaki connected realm
     const realmLink = connectedRealms[0].href;
@@ -108,7 +104,7 @@ export class MythicPlusComponent implements OnInit {
       ? matchesConnectedRealm[0]
       : null;
 
-    const urlDungeonsIndex = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmID}/mythic-leaderboard/index?namespace=dynamic-us&locale=en_US&access_token=${this.accessToken}`;
+    const urlDungeonsIndex = `https:/${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/${connectedRealmID}/mythic-leaderboard/index?namespace=${this.selectedNamespace}&locale=en_US&access_token=${this.accessToken}`;
     const responseDungeonsIndex = await axios.get(urlDungeonsIndex);
     const dungeonArray: DungeonEntry[] =
       responseDungeonsIndex.data.current_leaderboards;
@@ -129,7 +125,17 @@ export class MythicPlusComponent implements OnInit {
     if (currentPeriod) this.currentPeriod = parseInt(currentPeriod);
   }
 
-  getDungeonLeaderboard() {
+  async getDungeonLeaderboard() {
+    if (this.selectedDungeon == 0 || this.selectedRegion == '') {
+      const toast = await this.toastController.create({
+        message: 'Please select a region and a dungeon.',
+        duration: 3000,
+        color: 'danger',
+      });
+      toast.present();
+      return;
+    }
+    this.isLoading = true;
     this.leaderboards = []; //ciscenje
     console.log(this.selectedDungeon);
     console.log(this.currentPeriod);
@@ -194,23 +200,52 @@ export class MythicPlusComponent implements OnInit {
     };
 
     this.finalLeaderboard = finalLeaderboard;
-    // console.log(this.leaderboards);
-    console.log(this.finalLeaderboard);
+    const tableHeader = document.getElementById('table-header');
+    if (tableHeader) tableHeader.style.display = 'table-header-group';
+
+    this.isLoading = false;
     return finalLeaderboard;
   }
 
   async getDungeonLeaderboardByRealm(connectedRealm: number) {
-    const urlLeaderboard = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealm}/mythic-leaderboard/${this.selectedDungeon}/period/${this.currentPeriod}?namespace=dynamic-us&access_token=${this.accessToken}`;
+    const urlLeaderboard = `https://${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/${connectedRealm}/mythic-leaderboard/${this.selectedDungeon}/period/${this.currentPeriod}?namespace=${this.selectedNamespace}&access_token=${this.accessToken}`;
     const responseLeaderboard = await axios.get(urlLeaderboard);
+    console.log(responseLeaderboard);
     const leaderboardInput = responseLeaderboard.data;
     const leaderboard = convertToLeaderboard(leaderboardInput);
     this.leaderboards.push(leaderboard);
   }
+
+  formatDuration(duration: number): string {
+    const seconds = Math.floor(duration / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = (seconds % 60).toString().padStart(2, '0');
+    return `${formattedMinutes}:${formattedSeconds}`;
+  }
+
+  setRegion(region: string) {
+    if (this.selectedRegion === region) {
+      this.selectedRegion = '';
+    } else {
+      this.selectedRegion = region;
+      this.selectedNamespace = 'dynamic-' + region;
+    }
+    console.log(this.selectedRegion);
+    console.log(this.selectedNamespace);
+    this.returnDungeons();
+  }
 }
 
 function convertToLeaderboard(json: any): Leaderboard {
+  // moze da se desi da blizzard ne vrati ovo, ako na tom realmu bas nema nijedna grupa
+  if (!json.leading_groups) {
+    const emptyLeaderboard: Leaderboard = { groups: [] };
+    return emptyLeaderboard;
+  }
   const groups: Group[] = [];
   const leaderboardData = json.leading_groups;
+
   for (let i = 0; i < leaderboardData.length; i++) {
     const groupData = leaderboardData[i];
     const players: Player[] = [];
@@ -225,7 +260,7 @@ function convertToLeaderboard(json: any): Leaderboard {
       players.push(player);
     }
 
-    // kalkulacija score-a grupe
+    // prepakovanje u interfejs
     const group: Group = {
       keystone: groupData.keystone_level,
       players,

@@ -10,12 +10,23 @@
 
 table {
   font-size: 1.2em;
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
 }
 
+th {
+  text-align: left;
+  background-color: #f2f2f2;
+}
+
+td {
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+}
+
 .small {
-  width: 10%;
+  width: 15%;
   text-align: center;
 }
 

@@ -4,15 +4,91 @@
   </ion-toolbar>
 </ion-header>
 
+<ion-item>
+  <ion-label>Select Region:</ion-label>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-img
+          src="assets/flag_eu.svg"
+          (click)="setRegion('eu')"
+          [class.selected]="selectedRegion === 'eu'"
+          [class.transparent]="selectedRegion !== 'eu'"
+        ></ion-img>
+      </ion-col>
+      <ion-col>
+        <ion-img
+          src="assets/flag_us.svg"
+          (click)="setRegion('us')"
+          [class.selected]="selectedRegion === 'us'"
+          [class.transparent]="selectedRegion !== 'us'"
+        ></ion-img>
+      </ion-col>
+      <ion-col>
+        <ion-img
+          src="assets/flag_kr.svg"
+          (click)="setRegion('kr')"
+          [class.selected]="selectedRegion === 'kr'"
+          [class.transparent]="selectedRegion !== 'kr'"
+        ></ion-img>
+      </ion-col>
+      <ion-col>
+        <ion-img
+          src="assets/flag_tw.svg"
+          (click)="setRegion('tw')"
+          [class.selected]="selectedRegion === 'tw'"
+          [class.transparent]="selectedRegion !== 'tw'"
+        ></ion-img>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-item>
+
 <ion-content>
-  <ion-label> Select a Dungeon: </ion-label>
-  <ion-select [(ngModel)]="selectedDungeon" interface="popover">
-    <ion-select-option *ngFor="let dungeon of dungeons" [value]="dungeon.id">{{
-      dungeon.name
-    }}</ion-select-option>
-  </ion-select>
+  <ion-item>
+    <ion-label> Dungeon: </ion-label>
+    <ion-select [(ngModel)]="selectedDungeon" interface="popover">
+      <ion-select-option
+        *ngFor="let dungeon of dungeons"
+        [value]="dungeon.id"
+        >{{ dungeon.name }}</ion-select-option
+      >
+    </ion-select>
+  </ion-item>
 
   <div class="ion-text-center">
     <ion-button (click)="getDungeonLeaderboard()">Show Leaderboard</ion-button>
+  </div>
+
+  <div *ngIf="isLoading" class="loader"></div>
+
+  <div class="table-scrollable">
+    <table>
+      <thead id="table-header" class="hidden">
+        <tr>
+          <th>Players</th>
+          <th>Keystone</th>
+          <th>Duration</th>
+          <th>Rank</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let group of finalLeaderboard.groups" class="table-row">
+          <td>
+            <div class="player-list" *ngFor="let player of group.players">
+              <span
+                class="faction"
+                [ngClass]="player.faction === 'HORDE' ? 'horde' : 'alliance'"
+                >{{ player.faction === "HORDE" ? "H" : "A" }}</span
+              >
+              <span class="name">{{ player.name }}</span>
+            </div>
+          </td>
+          <td>{{ group.keystone }}</td>
+          <td>{{ formatDuration(group.duration) }}</td>
+          <td>{{ group.rank }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </ion-content>
