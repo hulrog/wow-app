@@ -36,6 +36,11 @@ interface GuildScore {
   region: string;
 }
 
+interface Raid {
+  name: string;
+  slug: string;
+}
+
 @Component({
   selector: 'app-guilds',
   templateUrl: './guilds.component.html',
@@ -45,12 +50,14 @@ export class GuildsComponent implements OnInit {
   accessToken: string;
   guilds: Guild[];
   guildScores: GuildScore[];
+  raids: Raid[];
   hallOfFame: hallOfFameEntry[];
   isLoading: boolean;
   constructor() {
     this.accessToken = '';
     this.guilds = [];
     this.guildScores = [];
+    this.raids = [];
     this.hallOfFame = [];
     this.isLoading = false;
   }
@@ -70,37 +77,58 @@ export class GuildsComponent implements OnInit {
       }
     );
     this.accessToken = response.data.access_token;
+    this.isLoading = true;
 
-    // Ceka da zavrse svi pozivi da bi izracunao hall
-    const promises = [
-      this.getWorldLeaderboard('uldir'),
-      this.getWorldLeaderboard('crucible-of-storms'),
-      this.getWorldLeaderboard('battle-of-dazaralor'),
-      this.getWorldLeaderboard('the-eternal-palace'),
-      this.getWorldLeaderboard('nyalotha-the-waking-city'),
-      this.getWorldLeaderboard('castle-nathria'),
-      this.getWorldLeaderboard('sanctum-of-domination'),
-      this.getWorldLeaderboard('sepulcher-of-the-first-ones'),
-      this.getWorldLeaderboard('vault-of-the-incarnates'),
+    // ovde bi morao da se doda sledeci expansion ako izadje...
+    const promisesSlugs = [
+      this.getRaidSlugs(7),
+      this.getRaidSlugs(8),
+      this.getRaidSlugs(9),
     ];
 
-    Promise.all(promises).then(() => {
-      this.calculateGuildScores(this.hallOfFame);
+    Promise.all(promisesSlugs).then(() => {
+      Promise.all(this.raids.map((raid) => this.getWorldLeaderboard(raid.slug)))
+        .then(() => {
+          this.calculateGuildScores(this.hallOfFame);
+        })
+        .catch((error) => {
+          console.error('Error fetching leaderboards:', error);
+        });
     });
+  }
+
+  async getRaidSlugs(expansionId: number): Promise<void> {
+    const url = `https://raider.io/api/v1/raiding/static-data?expansion_id=${expansionId}`;
+    const response = await axios.get(url);
+
+    const newRaids = response.data.raids
+      .filter((raid: any) => !raid.slug.includes('fated')) // fated raidovi ne bi trebalo da imaju rang
+      .map((raid: any) => ({
+        name: raid.name,
+        slug: raid.slug,
+      }));
+
+    this.raids = [...this.raids, ...newRaids];
+    console.log(this.raids);
   }
 
   // ovde treba da prodjem kroz podatke koje dobijam i na raids, da nekako agregiram
   // i rangiram guildove po skoru, kao neki ukupan rank za sve ove raidove
   async getWorldLeaderboard(raid: string) {
     // Podaci za hordu:
-    const urlHorde = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/horde?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
-    const responseHorde = await axios.get(urlHorde);
-    var entriesHorde: Entry[] = responseHorde.data.entries;
+    try {
+      const urlHorde = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/horde?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
+      const responseHorde = await axios.get(urlHorde);
+      var entriesHorde: Entry[] = responseHorde.data.entries;
 
-    // Podaci za alijansu
-    const urlAlliance = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/alliance?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
-    const responseAlliance = await axios.get(urlAlliance);
-    var entriesAlliance: Entry[] = responseAlliance.data.entries;
+      // Podaci za alijansu
+      const urlAlliance = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/alliance?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
+      const responseAlliance = await axios.get(urlAlliance);
+      var entriesAlliance: Entry[] = responseAlliance.data.entries;
+    } catch (error) {
+      console.log(`Hall of Fame not found for raid ${raid}`);
+      return;
+    }
 
     const entriesCombined: Entry[] = entriesHorde.concat(entriesAlliance);
     var combinedRank = 1;
@@ -180,6 +208,6 @@ export class GuildsComponent implements OnInit {
     scores.sort((a, b) => b.score - a.score);
 
     this.guildScores = scores;
-    console.log(this.guildScores);
+    this.isLoading = false;
   }
 }

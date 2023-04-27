@@ -3,10 +3,13 @@
     <ion-title>Dungeon</ion-title>
   </ion-toolbar>
 </ion-header>
-<div *ngIf="isLoading" class="loader"></div>
 
 <ion-content>
-  <div class="table-scrollable">
+  <div class="loader-container">
+    <div *ngIf="isLoading" class="loader"></div>
+  </div>
+
+  <div [ngClass]="{ hidden: isLoading }" class="table-scrollable">
     <table>
       <thead id="table-header" class="hidden">
         <tr>
