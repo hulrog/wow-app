@@ -1,1 +1,38 @@
-<p>guilds works!</p>
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Dungeon</ion-title>
+  </ion-toolbar>
+</ion-header>
+<div *ngIf="isLoading" class="loader"></div>
+
+<ion-content>
+  <div class="table-scrollable">
+    <table>
+      <thead id="table-header" class="hidden">
+        <tr>
+          <th>Guild</th>
+          <th>Region</th>
+          <th>Faction</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let guild of guildScores" class="table-row">
+          <td>{{ guild.name }}</td>
+          <td>
+            <img
+              [src]="'assets/flag_' + guild.region + '.svg'"
+              alt="NA"
+              width="36"
+              height="24"
+            />
+          </td>
+          <td [ngClass]="guild.faction === 'HORDE' ? 'horde' : 'alliance'">
+            {{ guild.faction === "HORDE" ? "H" : "A" }}
+          </td>
+          <td>{{ guild.score }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ion-content>

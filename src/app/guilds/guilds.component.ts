@@ -29,6 +29,13 @@ interface hallOfFameEntry {
   guilds: Guild[];
 }
 
+interface GuildScore {
+  name: string;
+  faction: string;
+  score: number;
+  region: string;
+}
+
 @Component({
   selector: 'app-guilds',
   templateUrl: './guilds.component.html',
@@ -37,11 +44,13 @@ interface hallOfFameEntry {
 export class GuildsComponent implements OnInit {
   accessToken: string;
   guilds: Guild[];
+  guildScores: GuildScore[];
   hallOfFame: hallOfFameEntry[];
   isLoading: boolean;
   constructor() {
     this.accessToken = '';
     this.guilds = [];
+    this.guildScores = [];
     this.hallOfFame = [];
     this.isLoading = false;
   }
@@ -62,8 +71,22 @@ export class GuildsComponent implements OnInit {
     );
     this.accessToken = response.data.access_token;
 
-    this.getWorldLeaderboard('vault-of-the-incarnates');
-    this.getWorldLeaderboard('uldir');
+    // Ceka da zavrse svi pozivi da bi izracunao hall
+    const promises = [
+      this.getWorldLeaderboard('uldir'),
+      this.getWorldLeaderboard('crucible-of-storms'),
+      this.getWorldLeaderboard('battle-of-dazaralor'),
+      this.getWorldLeaderboard('the-eternal-palace'),
+      this.getWorldLeaderboard('nyalotha-the-waking-city'),
+      this.getWorldLeaderboard('castle-nathria'),
+      this.getWorldLeaderboard('sanctum-of-domination'),
+      this.getWorldLeaderboard('sepulcher-of-the-first-ones'),
+      this.getWorldLeaderboard('vault-of-the-incarnates'),
+    ];
+
+    Promise.all(promises).then(() => {
+      this.calculateGuildScores(this.hallOfFame);
+    });
   }
 
   // ovde treba da prodjem kroz podatke koje dobijam i na raids, da nekako agregiram
@@ -98,6 +121,65 @@ export class GuildsComponent implements OnInit {
 
     const hallOfFameEntry: hallOfFameEntry = { raid: raid, guilds: guilds };
     this.hallOfFame.push(hallOfFameEntry);
-    console.log(this.hallOfFame);
+  }
+
+  async calculateGuildScores(rankings: any[]) {
+    const scores: GuildScore[] = [];
+    console.log(rankings);
+
+    for (const ranking of rankings) {
+      for (const guild of ranking.guilds) {
+        // Provera da li guild vec postoji u scores
+        const existingScore = scores.find(
+          (score) =>
+            score.name === guild.name && score.faction === guild.faction
+        );
+
+        if (existingScore) {
+          // Ako ima tog guilda
+          const rank = guild.rank;
+          let newScore = existingScore.score;
+          if (rank == 1) {
+            newScore += 1000;
+          } else if (rank <= 5) {
+            newScore += 500;
+          } else if (rank <= 10) {
+            newScore += 250;
+          } else if (rank <= 30) {
+            newScore += 100;
+          } else {
+            newScore += 25;
+          }
+          existingScore.score = newScore;
+        } else {
+          // Ako jos uvek nema skor
+          const rank = guild.rank;
+          let newScore = 0;
+          if (rank == 1) {
+            newScore += 1000;
+          } else if (rank <= 5) {
+            newScore += 500;
+          } else if (rank <= 10) {
+            newScore += 250;
+          } else if (rank <= 30) {
+            newScore += 100;
+          } else {
+            newScore += 25;
+          }
+          scores.push({
+            name: guild.name,
+            faction: guild.faction,
+            region: guild.region,
+            score: newScore,
+          });
+        }
+      }
+    }
+
+    // Sort the scores in descending order based on score
+    scores.sort((a, b) => b.score - a.score);
+
+    this.guildScores = scores;
+    console.log(this.guildScores);
   }
 }
