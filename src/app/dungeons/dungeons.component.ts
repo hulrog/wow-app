@@ -28,6 +28,7 @@ export class DungeonsComponent implements OnInit {
   dungeons: Dungeon[];
   selectedAffix: any = null;
   selectedSeason: number = 0;
+  seasonName: string = '';
   loading: boolean;
   numberOfSeasons: number = 0;
 
@@ -65,7 +66,6 @@ export class DungeonsComponent implements OnInit {
         `https://raider.io/api/v1/mythic-plus/affixes?region=eu&locale=en`
       );
       this.affixes = response.data.affix_details;
-      console.log(this.affixes);
     } catch (error) {
       console.log(error);
     }
@@ -77,9 +77,13 @@ export class DungeonsComponent implements OnInit {
       const response = await axios.get(
         `https://raider.io/api/v1/mythic-plus/static-data?expansion_id=9`
       );
+      console.log('RESPONSE:');
+      console.log(response);
       this.dungeons = response.data.seasons[season].dungeons;
       this.numberOfSeasons = response.data.seasons.length;
-      console.log(this.affixes);
+      this.seasonName = response.data.seasons[season].name;
+      console.log(season);
+      console.log(this.dungeons);
     } catch (error) {
       console.log(error);
     }
