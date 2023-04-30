@@ -2,14 +2,38 @@
   <ion-toolbar>
     <ion-title>Dungeon</ion-title>
   </ion-toolbar>
+  <ion-segment [(ngModel)]="selectedView" color="primary">
+    <ion-segment-button value="table"> Table View </ion-segment-button>
+    <ion-segment-button value="graph"> Graph View </ion-segment-button>
+  </ion-segment>
 </ion-header>
 
 <ion-content>
   <div class="loader-container">
     <div *ngIf="isLoading" class="loader"></div>
   </div>
+  <div
+    [ngClass]="{ hidden: isLoading || selectedView !== 'graph' }"
+    class="graph-score"
+  >
+    <ion-card>
+      <ion-card-content [ngClass]="{ 'ion-hide': !isLoading }">
+        <div class="loader-container">
+          <div *ngIf="isLoading" class="loader"></div>
+        </div>
+      </ion-card-content>
+      <ion-card-content
+        [ngClass]="{ 'ion-hide': isLoading || selectedView !== 'graph' }"
+      >
+        <canvas #barChart style="height: 40vh"></canvas>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
-  <div [ngClass]="{ hidden: isLoading }" class="table-scrollable">
+  <div
+    [ngClass]="{ hidden: isLoading || selectedView !== 'table' }"
+    class="table-scrollable"
+  >
     <table>
       <thead id="table-header" class="hidden">
         <tr>

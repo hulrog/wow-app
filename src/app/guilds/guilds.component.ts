@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import axios from 'axios';
+import { Chart, registerables } from 'chart.js';
 
 interface Entry {
   faction: {
@@ -47,12 +48,15 @@ interface Raid {
   styleUrls: ['./guilds.component.scss'],
 })
 export class GuildsComponent implements OnInit {
+  @ViewChild('barChart', { static: true }) barChart!: ElementRef;
+
   accessToken: string;
   guilds: Guild[];
   guildScores: GuildScore[];
   raids: Raid[];
   hallOfFame: hallOfFameEntry[];
   isLoading: boolean;
+  selectedView: string;
   constructor() {
     this.accessToken = '';
     this.guilds = [];
@@ -60,6 +64,7 @@ export class GuildsComponent implements OnInit {
     this.raids = [];
     this.hallOfFame = [];
     this.isLoading = false;
+    this.selectedView = 'table';
   }
 
   async ngOnInit() {
@@ -209,5 +214,67 @@ export class GuildsComponent implements OnInit {
 
     this.guildScores = scores;
     this.isLoading = false;
+    this.showChart();
+  }
+
+  showChart() {
+    Chart.register(...registerables);
+    const top10Guilds = this.guildScores.slice(0, 10);
+    const barChart = new Chart(this.barChart.nativeElement, {
+      type: 'bar',
+      data: {
+        labels: top10Guilds.map((guild) => guild.name),
+        datasets: [
+          {
+            label: 'Guild Scores',
+            data: top10Guilds.map((guild) => guild.score),
+            backgroundColor: top10Guilds.map((guild) => {
+              switch (guild.region) {
+                case 'eu':
+                  return 'skyblue';
+                case 'us':
+                  return 'darkblue';
+                case 'kr':
+                  return 'white';
+                case 'cn':
+                  return 'red';
+                case 'tw':
+                  return 'yellow';
+                default:
+                  return 'gray';
+              }
+            }),
+            borderColor: 'black',
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              generateLabels: function (chart) {
+                const labels = ['EU', 'US', 'KR', 'CN', 'TW'];
+                const colors = [
+                  'skyblue',
+                  'darkblue',
+                  'white',
+                  'red',
+                  'yellow',
+                ];
+                return labels.map((label, index) => {
+                  return {
+                    text: label,
+                    fillStyle: colors[index],
+                  };
+                });
+              },
+              boxWidth: 20,
+            },
+          },
+        },
+      },
+    });
   }
 }
