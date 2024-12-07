@@ -7,7 +7,7 @@ interface Affix {
   name: string;
   description: string;
   icon: string;
-  wowhead_url: string;
+  icon_url: string;
 }
 
 interface Dungeon {
@@ -52,6 +52,7 @@ export class DungeonsComponent implements OnInit {
         `https://raider.io/api/v1/mythic-plus/affixes?region=eu&locale=en`
       );
       this.affixes = response.data.affix_details;
+      console.log(this.affixes);
     } catch (error) {
       console.log(error);
     }
