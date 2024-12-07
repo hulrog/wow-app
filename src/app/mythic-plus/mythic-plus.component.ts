@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
+import { TokenService } from '../services/token.service';
 
 interface Leaderboard {
   groups: Group[];
@@ -56,7 +57,7 @@ export class MythicPlusComponent implements OnInit {
   currentPeriod: number;
   finalLeaderboard: FinalLeaderboard;
   isLoading: boolean;
-  constructor(private toastController: ToastController) {
+  constructor(private toastController: ToastController, private tokenService: TokenService) {
     this.accessToken = '';
     this.connectedRealms = [];
     this.dungeons = [];
@@ -70,26 +71,18 @@ export class MythicPlusComponent implements OnInit {
   }
 
   async ngOnInit() {
-    const response = await axios.post(
-      'https://us.battle.net/oauth/token',
-      'grant_type=client_credentials',
-      {
-        auth: {
-          username: '1902de7276ee46c396faf2730b4fe886',
-          password: 'hrdP3d9JN1XEQpROXaD8snsywgjQkBWu',
-        },
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
-    this.accessToken = response.data.access_token;
+    
+    this.accessToken = await this.tokenService.getAccessToken();
   }
 
   async returnDungeons() {
     //this.leaderboards = []; // izbrisi stari kad se pokrene funkcija ponovo
-    const urlConnectedRealms = `https://${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/index?namespace=${this.selectedNamespace}&locale=en_US&access_token=${this.accessToken}`;
-    const responseConnectedRealms = await axios.get(urlConnectedRealms);
+    const urlConnectedRealms = `https://${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/index?namespace=${this.selectedNamespace}&locale=en_US`;
+    const responseConnectedRealms = await axios.get(urlConnectedRealms, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`
+      }
+    });
 
     // Sad svaki od tih linkova mogu se pozvati da se dobiju zapravo realmovi
     const connectedRealms = responseConnectedRealms.data.connected_realms;
@@ -104,8 +97,12 @@ export class MythicPlusComponent implements OnInit {
       ? matchesConnectedRealm[0]
       : null;
 
-    const urlDungeonsIndex = `https:/${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/${connectedRealmID}/mythic-leaderboard/index?namespace=${this.selectedNamespace}&locale=en_US&access_token=${this.accessToken}`;
-    const responseDungeonsIndex = await axios.get(urlDungeonsIndex);
+    const urlDungeonsIndex = `https:/${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/${connectedRealmID}/mythic-leaderboard/index?namespace=${this.selectedNamespace}&locale=en_US`;
+    const responseDungeonsIndex = await axios.get(urlDungeonsIndex, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`
+      }
+    });
     const dungeonArray: DungeonEntry[] =
       responseDungeonsIndex.data.current_leaderboards;
 
@@ -208,8 +205,12 @@ export class MythicPlusComponent implements OnInit {
   }
 
   async getDungeonLeaderboardByRealm(connectedRealm: number) {
-    const urlLeaderboard = `https://${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/${connectedRealm}/mythic-leaderboard/${this.selectedDungeon}/period/${this.currentPeriod}?namespace=${this.selectedNamespace}&access_token=${this.accessToken}`;
-    const responseLeaderboard = await axios.get(urlLeaderboard);
+    const urlLeaderboard = `https://${this.selectedRegion}.api.blizzard.com/data/wow/connected-realm/${connectedRealm}/mythic-leaderboard/${this.selectedDungeon}/period/${this.currentPeriod}?namespace=${this.selectedNamespace}`;
+    const responseLeaderboard = await axios.get(urlLeaderboard, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`
+      }
+    });
     console.log(responseLeaderboard);
     const leaderboardInput = responseLeaderboard.data;
     const leaderboard = convertToLeaderboard(leaderboardInput);

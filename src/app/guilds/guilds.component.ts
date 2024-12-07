@@ -1,6 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import axios from 'axios';
 import { Chart, registerables } from 'chart.js';
+import { environment } from '../../environments/environment';
+import { TokenService } from '../services/token.service';
 
 interface Entry {
   faction: {
@@ -57,7 +59,7 @@ export class GuildsComponent implements OnInit {
   hallOfFame: hallOfFameEntry[];
   isLoading: boolean;
   selectedView: string;
-  constructor() {
+  constructor(private tokenService: TokenService) {
     this.accessToken = '';
     this.guilds = [];
     this.guildScores = [];
@@ -68,20 +70,7 @@ export class GuildsComponent implements OnInit {
   }
 
   async ngOnInit() {
-    const response = await axios.post(
-      'https://us.battle.net/oauth/token',
-      'grant_type=client_credentials',
-      {
-        auth: {
-          username: '1902de7276ee46c396faf2730b4fe886',
-          password: 'hrdP3d9JN1XEQpROXaD8snsywgjQkBWu',
-        },
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
-    this.accessToken = response.data.access_token;
+    this.accessToken = await this.tokenService.getAccessToken();
     this.isLoading = true;
 
     // ovde bi morao da se doda sledeci expansion ako izadje...
@@ -89,6 +78,7 @@ export class GuildsComponent implements OnInit {
       this.getRaidSlugs(7),
       this.getRaidSlugs(8),
       this.getRaidSlugs(9),
+      this.getRaidSlugs(10)
     ];
 
     Promise.all(promisesSlugs).then(() => {
@@ -122,13 +112,21 @@ export class GuildsComponent implements OnInit {
   async getWorldLeaderboard(raid: string) {
     // Podaci za hordu:
     try {
-      const urlHorde = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/horde?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
-      const responseHorde = await axios.get(urlHorde);
+      const urlHorde = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/horde?namespace=dynamic-eu&locale=en_EU`;
+      const responseHorde = await axios.get(urlHorde, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`
+        }
+      });
       var entriesHorde: Entry[] = responseHorde.data.entries;
 
       // Podaci za alijansu
-      const urlAlliance = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/alliance?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
-      const responseAlliance = await axios.get(urlAlliance);
+      const urlAlliance = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${raid}/alliance?namespace=dynamic-eu&locale=en_EU`;
+      const responseAlliance = await axios.get(urlAlliance, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`
+        }
+      });
       var entriesAlliance: Entry[] = responseAlliance.data.entries;
     } catch (error) {
       console.log(`Hall of Fame not found for raid ${raid}`);
@@ -158,7 +156,6 @@ export class GuildsComponent implements OnInit {
 
   async calculateGuildScores(rankings: any[]) {
     const scores: GuildScore[] = [];
-    console.log(rankings);
 
     for (const ranking of rankings) {
       for (const guild of ranking.guilds) {

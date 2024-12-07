@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
+import { TokenService } from '../services/token.service';
 
 interface Entry {
   faction: {
@@ -38,7 +39,7 @@ export class RaidsComponent implements OnInit {
   locale: string;
   guilds: Guild[];
   isLoading: boolean;
-  constructor(private toastController: ToastController) {
+  constructor(private toastController: ToastController, private tokenService: TokenService) {
     this.selectedRaid = '';
     this.selectedFaction = '';
     this.accessToken = '';
@@ -49,20 +50,7 @@ export class RaidsComponent implements OnInit {
   }
 
   async ngOnInit() {
-    const response = await axios.post(
-      'https://us.battle.net/oauth/token',
-      'grant_type=client_credentials',
-      {
-        auth: {
-          username: '1902de7276ee46c396faf2730b4fe886',
-          password: 'hrdP3d9JN1XEQpROXaD8snsywgjQkBWu',
-        },
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
-    this.accessToken = response.data.access_token;
+    this.accessToken = await this.tokenService.getAccessToken();
   }
 
   setFaction(faction: string) {
@@ -87,8 +75,12 @@ export class RaidsComponent implements OnInit {
     if (this.selectedFaction == 'both') {
       this.getWorldLeaderboard();
     } else {
-      const url = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/${this.selectedFaction}?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
-      const response = await axios.get(url);
+      const url = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/${this.selectedFaction}?namespace=dynamic-eu&locale=en_EU`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`
+        }
+      });
 
       var entries: Entry[] = response.data.entries;
 
@@ -112,13 +104,21 @@ export class RaidsComponent implements OnInit {
 
   async getWorldLeaderboard() {
     // Podaci za hordu:
-    const urlHorde = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/horde?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
-    const responseHorde = await axios.get(urlHorde);
+    const urlHorde = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/horde?namespace=dynamic-eu&locale=en_EU`;
+    const responseHorde = await axios.get(urlHorde, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`
+      }
+    });
     var entriesHorde: Entry[] = responseHorde.data.entries;
 
     // Podaci za alijansu
-    const urlAlliance = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/alliance?namespace=dynamic-eu&locale=en_EU&access_token=${this.accessToken}`;
-    const responseAlliance = await axios.get(urlAlliance);
+    const urlAlliance = `https://eu.api.blizzard.com/data/wow/leaderboard/hall-of-fame/${this.selectedRaid}/alliance?namespace=dynamic-eu&locale=en_EU`;
+    const responseAlliance = await axios.get(urlAlliance, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`
+      }
+    });
     var entriesAlliance: Entry[] = responseAlliance.data.entries;
 
     const entriesCombined: Entry[] = entriesHorde.concat(entriesAlliance);
